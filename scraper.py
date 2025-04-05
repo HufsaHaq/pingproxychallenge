@@ -6,6 +6,7 @@ def solution():
     max_year = 0
     min_year = 10000000
     make_dict = {}
+    count = 0
 
     for num in range(20):
         URL = f"https://scrapemequickly.com/cars/static/{num}?scraping_run_id=89d5dca4-0a34-11f0-b686-4a33b21d14f6"
@@ -29,16 +30,18 @@ def solution():
             make_dict[make] = 0
         
         make_dict[make] += 1
+        count += 1
+
 
     mode = max(make_dict, key=make_dict.get)
 
-    print({"min_year": min_year,"max_year": max_year,"avg_price": price_total/99999,"mode_make": mode})
+    #print({"min_year": min_year,"max_year": max_year,"avg_price": price_total/count,"mode_make": mode})
 
     return {
         "min_year": min_year,
         "max_year": max_year,
-        "avg_price": price_total/99999,
+        "avg_price": price_total/count,
         "mode_make": mode
     }
 
-solution()
+result = solution()
