@@ -6,6 +6,7 @@ def solution():
     max_year = 0
     min_year = 10000000
     make_list = []
+    notfound = False
 
     for num in range(99999):
         URL = f"https://scrapemequickly.com/cars/static/{num}?scraping_run_id=89d5dca4-0a34-11f0-b686-4a33b21d14f6"
@@ -33,6 +34,7 @@ def solution():
                 notfound = True
         if notfound:
             make_list.append([make, 1])
+        notfound = False
 
     temp = 0
     mode = ''
@@ -40,6 +42,8 @@ def solution():
         if i[1] > temp:
             temp = i[1]
             mode = i[0]
+    print("hi")
+    print({"min_year": min_year,"max_year": max_year,"avg_price": price_total/99999,"mode_make": mode})
 
     return {
         "min_year": min_year,
@@ -48,4 +52,4 @@ def solution():
         "mode_make": mode
     }
 
-
+solution()
