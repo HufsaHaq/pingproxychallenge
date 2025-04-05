@@ -9,7 +9,7 @@ min_year = 100000000
 
 def scraper(num):
     global total, make_dict, max_year, min_year
-    URL = f"https://scrapemequickly.com/cars/static/{num}?scraping_run_id=89d5dca4-0a34-11f0-b686-4a33b21d14f6"
+    URL = f"https://scrapemequickly.com/cars/static/{num}?scraping_run_id=d8559512-120b-11f0-b749-0242ac120003"
     page = requests.get(URL)
     if page.status_code == 429:
         scraper(num)
@@ -33,6 +33,7 @@ def scraper(num):
         make_dict[make] = 0
     
     make_dict[make] += 1
+    print(num)
 
 def use_threading():
     global total, make_dict, max_year, min_year
@@ -43,7 +44,7 @@ def use_threading():
         threads.append(thread)
         thread.start()
 
-        if len(threads) >= 3:
+        if len(threads) >= 2:
             for t in threads:
                 t.join()
             threads = []
