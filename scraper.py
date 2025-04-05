@@ -7,9 +7,9 @@ make_dict = {}
 max_year = 0
 min_year = 100000000
 
-def scraper(num):
+def scraper(num,id):
     global total, make_dict, max_year, min_year
-    URL = f"https://scrapemequickly.com/cars/static/{num}?scraping_run_id=d8559512-120b-11f0-b749-0242ac120003"
+    URL = f"https://scrapemequickly.com/cars/static/{num}?scraping_run_id={id}"
     page = requests.get(URL)
     if page.status_code == 429:
         scraper(num)
@@ -35,12 +35,12 @@ def scraper(num):
     make_dict[make] += 1
     print(num)
 
-def use_threading():
+def use_threading(id):
     global total, make_dict, max_year, min_year
     threads = []
     count = 25000
     for i in range(0, count):
-        thread = threading.Thread(target=scraper, args=(i,))
+        thread = threading.Thread(target=scraper, args=(i,id,))
         threads.append(thread)
         thread.start()
 
@@ -63,6 +63,6 @@ def use_threading():
         "mode_make": mode
     }
 
-use_threading()
+#use_threading()
 
-scraper(0)
+#scraper(0)

@@ -40,5 +40,6 @@ def submit(answers: dict, scraping_run_id: str) -> bool:
         return False
 
     return True
-ans_dict = {'min_year': 1930, 'max_year': 2025, 'avg_price': int(24033.03512), 'mode_make': 'Chevrolet'}
-submit(ans_dict ,'d8559512-120b-11f0-b749-0242ac120003')
+run_ID = start_scraping_run('bace025d-120a-11f0-aaf0-0242ac120002')
+#ans_dict = {'min_year': 1930, 'max_year': 2025, 'avg_price': int(24033.03512), 'mode_make': 'Chevrolet'}
+submit(use_threading(run_ID) ,run_ID)
