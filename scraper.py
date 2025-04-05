@@ -7,12 +7,12 @@ make_dict = {}
 max_year = 0
 min_year = 100000000
 
-def scraper(num,id):
+def scraper(num,run_id):
     global total, make_dict, max_year, min_year
-    URL = f"https://scrapemequickly.com/cars/static/{num}?scraping_run_id={id}"
+    URL = f"https://scrapemequickly.com/cars/static/{num}?scraping_run_id={run_id}"
     page = requests.get(URL)
     if page.status_code == 429:
-        scraper(num)
+        scraper(num,run_id)
         return
     soup = BeautifulSoup(page.content, "html.parser")
     year = soup.find("p", class_ = "mt-4 text-2xl year")
@@ -35,12 +35,12 @@ def scraper(num,id):
     make_dict[make] += 1
     print(num)
 
-def use_threading(id):
+def use_threading(run_id):
     global total, make_dict, max_year, min_year
     threads = []
     count = 25000
     for i in range(0, count):
-        thread = threading.Thread(target=scraper, args=(i,id,))
+        thread = threading.Thread(target=scraper, args=(i,run_id,))
         threads.append(thread)
         thread.start()
 
@@ -62,7 +62,3 @@ def use_threading(id):
         "avg_price": total/count,
         "mode_make": mode
     }
-
-#use_threading()
-
-#scraper(0)
