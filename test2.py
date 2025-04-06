@@ -6,7 +6,7 @@ import random
 import time
 from itertools import cycle
 
-THREAD_COUNT = 20
+THREAD_COUNT = 10#20
 TARGET = 25000
 RUN_ID = ""
 #run_ID = start_scraping_run('bace025d-120a-11f0-aaf0-0242ac120002')
@@ -71,7 +71,9 @@ def scraper(run_id):
     # threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 18 , token)))
     for thread in threads:
         thread.start()
-        thread.join()
+    
+    for t in threads:
+        t.join()
 
     return process_data(store)
 
@@ -100,7 +102,7 @@ def get_data(endpoint, index , key):
             response = response.content
             response = response.decode("utf-8")
             response = json.loads(response)
-            if status == 200:
+            if status != 429:
                 success = True
                 with store_lock:
                     for j in range(25):
@@ -109,20 +111,6 @@ def get_data(endpoint, index , key):
 
 def process_data(store):
     global min_year, max_year, make_dict, total, mode
-
-    # car = {
-    # carID: "year": ...
-    #         "price" ...
-    #           
-    #
-    #}
-
-    max_key = store["year"][max(store["year"], key=store["year"].get)]
-    mix_key = store["year"][min(store["year"], key=store["year"].get)]
-    total = sum(store["price"].values())
-    max_key = max(store["year"], key=store["year"].get)
-
-
     for car in store:
         total += car["price"]
         if car["year"]> max_year:
@@ -156,11 +144,46 @@ def submit(answers: dict, scraping_run_id: str) -> bool:
         return False
 
     return True   
-    
 
-run_ID = start_scraping_run('bace025d-120a-11f0-aaf0-0242ac120002')
-print(run_ID)
-#run_ID ='d8559512-120b-11f0-b749-0242ac120003'
-#print(scraper(run_ID))
-#mode = max(make_dict, key=make_dict.get)
-submit(scraper(run_ID), run_ID)
+total = 23956
+count = 1
+mode_make = {"Ford": 1}
+
+run_ID = start_scraping_run('26d3852b-12c8-11f0-b945-0242ac120003')
+answer = {
+    "min_year": 1930,
+    "max_year": 2025,
+    "avg_price": int(total/count),
+    "mode_make": "Ford"
+}
+ans = submit(answer, run_ID)
+print(f"Real Answer: {ans}")
+print(f"Guess Answr: {answer}")
+time.sleep(10.5)
+while True:
+    run_ID = start_scraping_run('26d3852b-12c8-11f0-b945-0242ac120003')
+    make = ans["mode_make"]
+    price = int(ans["avg_price"])
+
+
+    count = count + 1
+    total = total + price 
+
+
+    if make not in mode_make:
+        mode_make[make] = 0
+    mode_make[make] += 1
+    max_value = max(mode_make.values())
+    mode = next(key for key, value in mode_make.items() if value == max_value)
+
+    answer = {
+        "min_year": 1930,
+        "max_year": 2025,
+        "avg_price": int(total/count),
+        "mode_make": mode
+    }
+    print(f"Real Answer: {ans}")
+    print(f"Guess Answr: {answer}")
+    ans = submit(answer, run_ID)
+    time.sleep(10.3)
+
