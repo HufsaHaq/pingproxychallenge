@@ -1,13 +1,12 @@
-import java.util.*;
-import java.util.concurrent.*;
-import java.net.*;
 import java.io.IOException;
+import java.net.*;
+import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.net.http.HttpClient;
+import java.util.*;
 
 
-public class Scraper {
+public class Scraper{
     private static final int THREAD_COUNT = 10;
     private static final int TARGET = 25000;
 
@@ -55,4 +54,23 @@ public class Scraper {
     }
 
 
+}
+
+class GetData extends Thread{
+    public String endpoint = "";
+    public int index = 0;
+    public String key = "";
+
+    public GetData(String endpoint, int index, String key)
+    {
+        this.endpoint = endpoint;
+        this.index = index;
+        this.key = key;
+
+    }
+    @Override
+    public void run()
+    {
+        
+    }
 }
