@@ -5,18 +5,7 @@ import json
 import random
 import time
 
-def start_scraping_run(team_id: str) -> str:
-    r = requests.post(f"https://api.scrapemequickly.com/scraping-run?team_id={team_id}")
-
-    if r.status_code != 200:
-        print(r.json())
-        print("Failed to start scraping run")
-        sys.exit(1)
-
-    return r.json()["data"]["scraping_run_id"]
-
-
-THREAD_COUNT = 4
+THREAD_COUNT = 5
 TARGET = 25000
 RUN_ID = ""
 #run_ID = start_scraping_run('bace025d-120a-11f0-aaf0-0242ac120002')
@@ -26,6 +15,16 @@ make_dict = {}
 total = 0
 mode = 0
 store = []
+
+def start_scraping_run(team_id: str) -> str:
+    r = requests.post(f"https://api.scrapemequickly.com/scraping-run?team_id={team_id}")
+
+    if r.status_code != 200:
+        print(r.json())
+        print("Failed to start scraping run")
+        sys.exit(1)
+
+    return r.json()["data"]["scraping_run_id"]
 
 
 def get_key(id):
@@ -39,8 +38,12 @@ def scraper(run_id):
     token = get_key(run_id)
     ENDPOINT = f"https://api.scrapemequickly.com/cars/test?scraping_run_id={run_id}&per_page=25&start=" #CONCAT THING AT END PLS
     threads = []
-    for i in range(THREAD_COUNT):
-        threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, i , token)))
+
+    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 0 , token)))
+    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 1 , token)))
+    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 2 , token)))
+    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 3 , token)))
+    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 4 , token)))
     for thread in threads:
         thread.start()
     
@@ -63,8 +66,10 @@ def get_data(endpoint, index , key):
         success = False
         while not success:
             number = random.randint(0,2)
-            print(str(index+(25*i)))
-            response = requests.get(endpoint + str(index+(25*i)), 
+            #print(str((index*6250)+(25*i)))
+            print('i',i)
+            print('index',index)
+            response = requests.get(endpoint + str((index*5000)+(25*i)), 
                 headers={
                     "Authorization": f"Bearer {key}",
                     "User-Agent": users[number]
@@ -80,7 +85,7 @@ def get_data(endpoint, index , key):
                         store.append(response["data"][j])
             else:
                 print(status)
-            time.sleep(0.3)
+            time.sleep(0.2)
 def process_data(store):
     global min_year, max_year, make_dict, total, mode
     for car in store:
