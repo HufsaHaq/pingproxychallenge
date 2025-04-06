@@ -6,7 +6,7 @@ import random
 import time
 from itertools import cycle
 
-THREAD_COUNT = 20
+THREAD_COUNT = 10#20
 TARGET = 25000
 RUN_ID = ""
 #run_ID = start_scraping_run('bace025d-120a-11f0-aaf0-0242ac120002')
@@ -16,7 +16,7 @@ make_dict = {}
 total = 0
 mode = 0
 store = []
-
+store_lock = threading.Lock()
 proxy_pool = cycle([
     'http://pingproxies:scrapemequickly@194.87.135.1:9875',    
     'http://pingproxies:scrapemequickly@194.87.135.2:9875',
@@ -49,58 +49,50 @@ def scraper(run_id):
     ENDPOINT = f"https://api.scrapemequickly.com/cars/test?scraping_run_id={run_id}&per_page=25&start=" #CONCAT THING AT END PLS
     threads = []
 
-    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 0 , token, False)))
-    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 1 , token, False)))
-    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 2 , token, False)))
-    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 3 , token, False)))
-    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 4 , token, False)))
-    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 5 , token, False)))
-    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 6 , token, True)))
-    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 7 , token, True)))
-    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 8 , token, True)))
-    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 9 , token, True)))
-    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 10 , token, True)))
-    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 11, token, True)))
-    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 12 , token, True)))
-    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 13 , token, True)))
-    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 14 , token, True)))
-    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 15 , token, True)))
-    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 16 , token, True)))
-    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 17 , token, True)))
-    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 19 , token, True)))
-    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 18 , token, True)))
+    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 0 , token)))
+    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 1 , token)))
+    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 2 , token)))
+    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 3 , token)))
+    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 4 , token)))
+    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 5 , token)))
+    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 6 , token)))
+    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 7 , token)))
+    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 8 , token)))
+    threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 9 , token)))
+    # threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 10 , token)))
+    # threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 11, token)))
+    # threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 12 , token)))
+    # threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 13 , token)))
+    # threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 14 , token)))
+    # threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 15 , token)))
+    # threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 16 , token)))
+    # threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 17 , token)))
+    # threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 19 , token)))
+    # threads.append(threading.Thread(target=lambda:get_data(ENDPOINT, 18 , token)))
     for thread in threads:
         thread.start()
     
     for t in threads:
         t.join()
 
-    result = process_data(store)
-    print(result)
-    print(len(store))
-    return (result)
+    return process_data(store)
 
-    
-        
-store_lock = threading.Lock()
-def get_data(endpoint, index , key, is_proxy):
+
+def get_data(endpoint, index , key):
     global store
-    users =["Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36", "Mozilla/5.0 (Linux; Android 13; SM-S908B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36","Mozilla/5.0 (Linux; Android 13; SM-S908U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36"]
+    #users =["Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36", "Mozilla/5.0 (Linux; Android 13; SM-S908B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36","Mozilla/5.0 (Linux; Android 13; SM-S908U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36"]
     
     for i in range(int(TARGET/(THREAD_COUNT*25))):
         success = False
         while not success:
-            number = random.randint(0,2)
-            #print(str((index*6250)+(25*i)))
-            print('i',i)
-            print('index',index)
+            #number = random.randint(0,2)
             proxy = next(proxy_pool)
-            response = requests.get(endpoint + str((index*1250)+(25*i)), 
+            response = requests.get(endpoint + str((index*2500)+(25*i)), 
                 headers={
                     "Authorization": f"Bearer {key}",
-                    "User-Agent": users[number]
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36" #users[number]
                 },
-                proxies = None if not is_proxy else {
+                proxies = {
                     'http' : proxy,    
                     'https' : proxy
                 } 
@@ -115,8 +107,7 @@ def get_data(endpoint, index , key, is_proxy):
                 with store_lock:
                     for j in range(25):
                         store.append(response["data"][j])
-            else:
-                print(status)
+
 
 def process_data(store):
     global min_year, max_year, make_dict, total, mode
@@ -124,7 +115,7 @@ def process_data(store):
         total += car["price"]
         if car["year"]> max_year:
             max_year = car["year"]
-        if car["year"] < min_year:
+        elif car["year"] < min_year:
             min_year = car["year"]
             
         if car["make"] not in make_dict:
